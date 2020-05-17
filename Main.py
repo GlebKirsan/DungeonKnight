@@ -1,5 +1,6 @@
 import pygame
 import time
+from threading import Thread
 from GameSettings import *
 import Objects
 import ScreenEngine as SE
@@ -76,6 +77,7 @@ def get_voice_command() -> int:
     if command not in VOICE_TO_KEY:
         return -1
     return VOICE_TO_KEY[command]
+
 
 
 def key_decider(event_key):
@@ -157,6 +159,7 @@ VOICE_TO_KEY = {
     'new game': pygame.K_r,
     'restart': pygame.K_RETURN,
     'escape': pygame.K_ESCAPE,
+    'Escape': pygame.K_ESCAPE,
     'move up': pygame.K_UP,
     'up': pygame.K_UP,
     'move down': pygame.K_DOWN,
@@ -171,18 +174,25 @@ VOICE_TO_KEY = {
     'run right': pygame.K_d,
 }
 
+a = lambda x: [repaint(gameDisplay, pygame, drawer) for _ in range(x)]
 if use_micro:
-    cnt=0
+    speecher = Speecher()
+    dict = {"command": ""}
+    a(2)  # :D
+    dict["command"] = speecher.listen_to()
     while engine.working:
-        cnt += 1
-        if cnt < 5:
-            repaint(gameDisplay, pygame, drawer)
-            continue
         repaint(gameDisplay, pygame, drawer)
-        key = get_voice_command()
-        print("key: " + str(key))
-        key_decider(key)
-        repaint(gameDisplay, pygame, drawer)
+        if dict["command"] != "":
+            if dict["command"] not in VOICE_TO_KEY:
+                print("not in VOICE_TO_KEY")
+                dict["command"] = ""
+                continue
+            key = VOICE_TO_KEY[dict["command"]]
+            key_decider(key)
+            dict["command"] = ""
+            a(3)
+        pygame.event.get()
+        speecher.listen(dict)
 else:
     while engine.working:
         for event in pygame.event.get():

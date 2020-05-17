@@ -21,3 +21,33 @@ class Speecher:
 
         print(f"Returned {self.speech}")
         return self.speech
+
+
+    def listen(self, dict):
+        with sr.Microphone() as source:
+            print("Say something!")
+            audio = self.recognizer.listen(source)
+        try:
+            dict["command"] = self.recognizer.recognize_google(audio)
+            self.speech = dict["command"]
+            print(f"Google Speech Recognition thinks you said {self.speech}")
+        except sr.UnknownValueError:
+            print("Google Speech Recognition could not understand audio")
+        except sr.RequestError as e:
+            print(f"Could not request results; {e}")
+
+
+    def loop_listen_to(self, dict):
+        with sr.Microphone() as source:
+            while True:
+                print("Say something:")
+                audio = self.recognizer.listen(source)
+                try:
+                    dict["command"] = self.recognizer.recognize_google(audio)
+                    command = dict["command"]
+                    print(f"Google Speech Recognition thinks you said {command}")
+                except sr.UnknownValueError:
+                    print("Google Speech Recognition could not understand audio")
+                except sr.RequestError as e:
+                    print(f"Could not request results; {e}")
+                # return (self.recognizer.recognize_google(audio))
