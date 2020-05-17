@@ -25,7 +25,8 @@ class LevelGenerator:
     @classmethod
     def load(cls, file):
         with open(file, "r") as file:
-            cls.levels = yaml.load(file.read())['levels']
+            cls.levels = yaml.load(file.read(), 
+                                   Loader=yaml.Loader)['levels']
 
         cls.levels = [] if cls.levels is None else cls.levels
 
@@ -182,7 +183,7 @@ class ObjectsLib:
 
     @classmethod
     def append(cls, stream):
-        objects = yaml.load(stream)
+        objects = yaml.load(stream, Loader=yaml.Loader)
         sprite = cls._generators.get("sprite", None)
         sprite_creation = sprite.create \
             if sprite is not None else lambda x, y: None

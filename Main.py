@@ -4,6 +4,8 @@ import Objects
 import ScreenEngine as SE
 import Logic
 import Service
+from Speech2Text import Speecher
+from argparse import ArgumentParser
 
 
 class MyHeroFactory(Objects.AbstractHeroFactory):
@@ -27,7 +29,7 @@ def quit_game(pygame_obj):
 
 
 def create_game(sprite_size, pygame_obj):
-    dict_dirs  = {
+    dict_dirs = {
         'objects': OBJECT_TEXTURE,
         'ally': ALLY_TEXTURE,
         'enemies': ENEMY_TEXTURE,
@@ -66,6 +68,59 @@ def create_game(sprite_size, pygame_obj):
     return engine_obj
 
 
+def get_voice_command() -> int:
+    speecher = Speecher()
+    command = speecher.listen_to()
+    if command not in VOICE_TO_KEY:
+        return -1
+    return VOICE_TO_KEY[command]
+
+
+def key_decider(event_key):
+    global engine
+    if event_key == pygame.K_h:
+        # Справка
+        engine.show_help = not engine.show_help
+        repaint(gameDisplay, pygame, drawer)
+    if event_key == pygame.K_m:
+        # Показать миникарту
+        engine.show_minimap = not engine.show_minimap
+        repaint(gameDisplay, pygame, drawer)
+    if event_key == pygame.K_F12:
+        # Маленький "не документированный" чит
+        engine.level_next()
+    if event_key == pygame.K_KP_PLUS or \
+        event_key == pygame.K_PLUS or \
+        event_key == pygame.K_EQUALS:
+        # Приближаем карту
+        engine.zoom_in()
+    if event_key == pygame.K_KP_MINUS or event_key == pygame.K_MINUS:
+        # Отдаляем карту
+        engine.zoom_out()
+    if event_key == pygame.K_r:
+        # Рестарт
+        engine.sprite_size = BASE_SPRITE_SIZE
+        engine.start()
+    if event_key == pygame.K_RETURN or event_key == pygame.K_KP_ENTER:
+        # Сброс уровня
+        engine.level_reset()
+    if event_key == pygame.K_ESCAPE:
+        engine.working = False
+    if engine.game_process:
+        if event_key == pygame.K_UP:
+            engine.move_up()
+        elif event_key == pygame.K_DOWN:
+            engine.move_down()
+        elif event_key == pygame.K_LEFT:
+            engine.move_left()
+        elif event_key == pygame.K_RIGHT:
+            engine.move_right()
+
+parser = ArgumentParser()
+parser.add_argument('--use-micro', type=bool)
+args = parser.parse_args()
+use_micro = args.use_micro
+
 pygame.init()
 gameDisplay = pygame.display.set_mode(SCREEN_DIM)
 pygame.display.set_caption("MyRPG")
@@ -83,51 +138,34 @@ drawer = SE.GameSurface((640, 480), pygame.SRCALPHA, (0, 480), drawer)
 
 drawer.connect_engine(engine)
 
-while engine.working:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            engine.working = False
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_h:
-                # Справка
-                engine.show_help = not engine.show_help
-                repaint(gameDisplay, pygame, drawer)
-                break
-            if event.key == pygame.K_m:
-                # Показать миникарту
-                engine.show_minimap = not engine.show_minimap
-                repaint(gameDisplay, pygame, drawer)
-                break
-            if event.key == pygame.K_F12:
-                # Маленький "не документированный" чит
-                engine.level_next()
-            if event.key == pygame.K_KP_PLUS or \
-                    event.key == pygame.K_PLUS or \
-                    event.key == pygame.K_EQUALS:
-                # Приближаем карту
-                engine.zoom_in()
-            if event.key == pygame.K_KP_MINUS or event.key == pygame.K_MINUS:
-                # Отдаляем карту
-                engine.zoom_out()
-            if event.key == pygame.K_r:
-                # Рестарт
-                engine.sprite_size = BASE_SPRITE_SIZE
-                engine.start()
-            if event.key == pygame.K_RETURN or event.key == pygame.K_KP_ENTER:
-                # Сброс уровня
-                engine.level_reset()
-            if event.key == pygame.K_ESCAPE:
-                engine.working = False
-            if engine.game_process:
-                if event.key == pygame.K_UP:
-                    engine.move_up()
-                elif event.key == pygame.K_DOWN:
-                    engine.move_down()
-                elif event.key == pygame.K_LEFT:
-                    engine.move_left()
-                elif event.key == pygame.K_RIGHT:
-                    engine.move_right()
+VOICE_TO_KEY = {
+    'help': pygame.K_h,
+    'map': pygame.K_m,
+    'next level': pygame.K_F12,
+    'zoom in': pygame.K_KP_PLUS,
+    'zoom out': pygame.K_KP_MINUS,
+    'new game': pygame.K_r,
+    'restart': pygame.K_RETURN,
+    'escape': pygame.K_ESCAPE,
+    'move up': pygame.K_UP,
+    'move down': pygame.K_DOWN,
+    'move left': pygame.K_LEFT,
+    'move right': pygame.K_RIGHT,
+}
 
-    repaint(gameDisplay, pygame, drawer)
+if use_micro:
+    while engine.working:
+        key = get_voice_command()
+        key_decider(key)
+        repaint(gameDisplay, pygame, drawer)
+else:
+    while engine.working:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                engine.working = False
+            if event.type == pygame.KEYDOWN:
+                key_decider(event.key)
+
+        repaint(gameDisplay, pygame, drawer)
 
 quit_game(pygame)

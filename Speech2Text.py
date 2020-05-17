@@ -12,11 +12,11 @@ class Speecher:
             audio = self.recognizer.listen(source)
         try:
             self.speech = self.recognizer.recognize_google(audio)
-            print("Google Speech Recognition thinks you said " + self.speech)
+            print(f"Google Speech Recognition thinks you said {self.speech}")
         except sr.UnknownValueError:
             print("Google Speech Recognition could not understand audio")
         except sr.RequestError as e:
-            print("Could not request results; {0}".format(e))
+            print(f"Could not request results; {e}")
 
-        print("Returned " + self.speech)
+        print(f"Returned {self.speech}")
         return self.speech
