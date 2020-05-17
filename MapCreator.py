@@ -112,6 +112,12 @@ class GameMap:
 
     def __len__(self):
         return int(len(self._map[0]) * len(self._map))
+    
+    def __contains__(self, key):
+        first_dim = 0 <= key[0] < len(self._map[0])
+        second_dim = 0 <= key[1] < len(self._map)
+        is_vector = len(key) == 2
+        return first_dim and second_dim and is_vector
 
     def __getitem__(self, key):
         if not isinstance(key, tuple):

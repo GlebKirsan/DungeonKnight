@@ -71,7 +71,11 @@ class GameEngine:
 
     # MOVEMENT
     def move(self, diff):
-        if self.map[self.hero.position[0] + diff[0], self.hero.position[1] + diff[1]].passable:
+        new_position = (self.hero.position[0] + diff[0], 
+                        self.hero.position[1] + diff[1])
+        if new_position not in self.map:
+            return
+        if self.map[new_position].passable:
             self.score -= 0.02
             for num, step in enumerate(diff):
                 self.hero.position[num] += step
