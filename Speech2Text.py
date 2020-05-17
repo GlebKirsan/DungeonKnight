@@ -4,6 +4,7 @@ import speech_recognition as sr
 class Speecher:
     def __init__(self):
         self.recognizer = sr.Recognizer()
+        self.recognizer.dynamic_energy_threshold = False
         self.speech = ""
 
     def listen_to(self):

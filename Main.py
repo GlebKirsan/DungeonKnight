@@ -1,4 +1,5 @@
 import pygame
+import time
 from GameSettings import *
 import Objects
 import ScreenEngine as SE
@@ -71,6 +72,7 @@ def create_game(sprite_size, pygame_obj):
 def get_voice_command() -> int:
     speecher = Speecher()
     command = speecher.listen_to()
+    print("command: " + command)
     if command not in VOICE_TO_KEY:
         return -1
     return VOICE_TO_KEY[command]
@@ -115,6 +117,14 @@ def key_decider(event_key):
             engine.move_left()
         elif event_key == pygame.K_RIGHT:
             engine.move_right()
+        elif event_key == pygame.K_w:
+            engine.run_up()
+        elif event_key == pygame.K_s:
+            engine.run_down()
+        elif event_key == pygame.K_a:
+            engine.run_left()
+        elif event_key == pygame.K_d:
+            engine.run_right()
 
 parser = ArgumentParser()
 parser.add_argument('--use-micro', type=bool)
@@ -148,14 +158,29 @@ VOICE_TO_KEY = {
     'restart': pygame.K_RETURN,
     'escape': pygame.K_ESCAPE,
     'move up': pygame.K_UP,
+    'up': pygame.K_UP,
     'move down': pygame.K_DOWN,
+    'down': pygame.K_DOWN,
     'move left': pygame.K_LEFT,
+    'left': pygame.K_LEFT,
     'move right': pygame.K_RIGHT,
+    'right': pygame.K_RIGHT,
+    'run up': pygame.K_w,
+    'run left': pygame.K_a,
+    'run down': pygame.K_s,
+    'run right': pygame.K_d,
 }
 
 if use_micro:
+    cnt=0
     while engine.working:
+        cnt += 1
+        if cnt < 5:
+            repaint(gameDisplay, pygame, drawer)
+            continue
+        repaint(gameDisplay, pygame, drawer)
         key = get_voice_command()
+        print("key: " + str(key))
         key_decider(key)
         repaint(gameDisplay, pygame, drawer)
 else:

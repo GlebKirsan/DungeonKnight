@@ -81,14 +81,26 @@ class GameEngine:
     def move_up(self):
         self.move((0, -1))
 
+    def run_up(self):
+        self.move((0, -5))
+
     def move_down(self):
         self.move((0, 1))
+
+    def run_down(self):
+        self.move((0, 5))
 
     def move_left(self):
         self.move((-1, 0))
 
+    def run_left(self):
+        self.move((-5, 0))
+
     def move_right(self):
         self.move((1, 0))
+
+    def run_right(self):
+        self.move((5, 0))
 
     # MAP
     def load_map(self, game_map):
@@ -109,10 +121,11 @@ class GameEngine:
 
     # GRAPHIC
     def zoom_in(self):
-        self.zoom(+1)
+        self.zoom(+10)
 
     def zoom_out(self):
-        self.zoom(-1)
+        self.zoom(-10)
+
 
     def zoom(self, val):
         prev_size = self.sprite_size
